@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>โปรไฟล์สุดอลังการ</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    min-height: 100vh; padding: 50px 16px; text-align: center; color: white;
+    background: radial-gradient(circle at 50% 0%, #2b1055, #0b0620 70%);
+    overflow-x: hidden;
+  }
+  #stars { position: fixed; inset: 0; z-index: -1; }
+
+  /* แสงเรืองตามเมาส์ */
+  #glow {
+    position: fixed; width: 300px; height: 300px; border-radius: 50%;
+    pointer-events: none; z-index: 0; transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(138,92,255,0.35), transparent 70%);
+  }
+
+  /* หัวข้อ */
+  h1 {
+    font-size: clamp(2rem, 6vw, 3.2rem); position: relative; z-index: 1;
+    background: linear-gradient(90deg, #ff6ec4, #7873f5, #4ade80, #ff6ec4);
+    background-size: 300% 100%; -webkit-background-clip: text; background-clip: text;
+    color: transparent; animation: shine 5s linear infinite;
+  }
+  @keyframes shine { to { background-position: 300% 0; } }
+  #typing { min-height: 28px; margin: 10px 0 40px; opacity: 0.85; position: relative; z-index: 1; }
+  #typing::after { content: "|"; animation: blink 0.8s infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* การ์ดหน้าแรก */
+  .grid { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; position: relative; z-index: 1; perspective: 900px; }
+  .mini-card {
+    width: 210px; padding: 28px 16px; border-radius: 24px; cursor: pointer; position: relative; overflow: hidden;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.25);
+    backdrop-filter: blur(10px); transition: transform 0.15s ease-out, box-shadow 0.3s;
+    animation: floaty 4s ease-in-out infinite;
+  }
+  .mini-card:nth-child(2) { animation-delay: 0.6s; }
+  .mini-card:nth-child(3) { animation-delay: 1.2s; }
+  @keyframes floaty { 50% { margin-top: -10px; } }
+  .mini-card:hover { box-shadow: 0 0 35px var(--c1); }
+  .mini-card .shine {
+    position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.3s;
+    background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,0.35), transparent 50%);
+  }
+  .mini-card:hover .shine { opacity: 1; }
+  .pic { font-size: 3.5rem; }
+  .pic img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid white; }
+  .mini-card h3 { margin-top: 10px; font-size: 1.3rem; }
+  .mini-card p { opacity: 0.8; }
+  .hint { margin-top: 36px; opacity: 0.7; position: relative; z-index: 1; }
+
+  /* หน้าต่างเด้ง */
+  .overlay {
+    position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
+    padding: 16px; background: rgba(5,0,20,0.75); backdrop-filter: blur(6px); z-index: 10;
+  }
+  .overlay.show { display: flex; }
+  .modal {
+    position: relative; width: 100%; max-width: 400px; max-height: 92vh; overflow-y: auto;
+    padding: 34px 24px 26px; border-radius: 28px; color: white;
+    box-shadow: 0 0 60px var(--c1); animation: popIn 0.5s cubic-bezier(.2,1.4,.4,1);
+  }
+  @keyframes popIn { from { opacity: 0; transform: scale(0.4) rotate(-12deg); } }
+  .modal.swap { animation: swap 0.4s ease; }
+  @keyframes swap { from { opacity: 0; transform: translateX(60px) scale(0.9); } }
+  .close { position: absolute; top: 12px; right: 16px; border: none; background: none; color: white; font-size: 1.6rem; cursor: pointer; transition: transform 0.3s; }
+  .close:hover { transform: rotate(90deg) scale(1.2); }
+
+  .avatar {
+    width: 140px; height: 140px; border-radius: 50%; margin: 0 auto 14px; overflow: hidden;
+    display: flex; align-items: center; justify-content: center; font-size: 4.5rem;
+    background: rgba(255,255,255,0.25); border: 4px solid white; cursor: pointer;
+    animation: pulse 2.5s infinite; transition: transform 0.5s;
+  }
+  .avatar:hover { transform: rotate(360deg) scale(1.1); }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.6); } 50% { box-shadow: 0 0 0 18px rgba(255,255,255,0); } }
+
+  .modal h2 { font-size: 1.8rem; }
+  .info { margin: 6px 0; font-size: 1.1rem; }
+  .bio { margin: 10px 0 14px; opacity: 0.92; }
+
+  /* แท็กงานอดิเรก */
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 16px; }
+  .tag { padding: 5px 14px; border-radius: 20px; background: rgba(255,255,255,0.22); font-size: 0.9rem; transition: transform 0.2s; }
+  .tag:hover { transform: scale(1.15) rotate(-3deg); }
+
+  /* หลอดทักษะ */
+  .skill { text-align: left; margin: 8px 0; font-size: 0.9rem; }
+  .bar { height: 10px; margin-top: 4px; border-radius: 10px; background: rgba(0,0,0,0.3); overflow: hidden; }
+  .fill { height: 100%; width: 0; border-radius: 10px; background: linear-gradient(90deg, #fff, #ffe66d); transition: width 1.2s cubic-bezier(.2,.8,.2,1); }
+
+  /* ปุ่ม */
+  .btns { margin-top: 18px; }
+  .btn {
+    border: none; padding: 10px 18px; margin: 4px; border-radius: 30px; font-size: 1rem; cursor: pointer;
+    background: white; color: #333; transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn:hover { transform: scale(1.1) rotate(-2deg); box-shadow: 0 6px 16px rgba(0,0,0,0.4); }
+  .btn:active { transform: scale(0.9); }
+  .nav { position: fixed; top: 50%; transform: translateY(-50%); width: 50px; height: 50px; border-radius: 50%;
+    border: none; font-size: 1.5rem; cursor: pointer; background: rgba(255,255,255,0.9); z-index: 11; display: none; transition: transform 0.2s; }
+  .overlay.show ~ .nav { display: block; }
+  .nav:hover { transform: translateY(-50%) scale(1.2); }
+  #prev { left: 12px; } #next { right: 12px; }
+  .shake { animation: shake 0.5s; }
+  @keyframes shake { 25% { transform: translateX(-8px) rotate(-2deg); } 75% { transform: translateX(8px) rotate(2deg); } }
+
+  /* คอนเฟตติ */
+  .confetti { position: fixed; width: 10px; height: 14px; pointer-events: none; z-index: 30; }
+</style>
+</head>
+<body>
+  <canvas id="stars"></canvas>
+  <div id="glow"></div>
+
+  <h1>✨ โปรไฟล์สุดอลังการ ✨</h1>
+  <div id="typing"></div>
+  <div class="grid" id="grid"></div>
+  <p class="hint">👆 กดที่การ์ดเพื่อดูข้อมูล (ลองขยับเมาส์บนการ์ดดู)</p>
+
+  <div class="overlay" id="overlay">
+    <div class="modal" id="modal">
+      <button class="close" id="closeBtn">✕</button>
+      <div class="avatar" id="mAvatar"></div>
+      <h2 id="mName"></h2>
+      <div class="info" id="mAge"></div>
+      <div class="bio" id="mBio"></div>
+      <div class="tags" id="mTags"></div>
+      <div id="mSkills"></div>
+      <div class="btns">
+        <button class="btn" id="likeBtn"></button>
+        <button class="btn" id="birthdayBtn">🎂 เพิ่มอายุ</button>
+      </div>
+    </div>
+  </div>
+  <button class="nav" id="prev">‹</button>
+  <button class="nav" id="next">›</button>
+
+<script>
+  // ===== ข้อมูลแต่ละคน (แก้ตรงนี้ได้เลย) =====
+  // photo: ใส่ชื่อไฟล์รูป เช่น "james.jpg" (เว้นว่างจะแสดง emoji)
+  const people = [
+    { name: "เจมส์", age: 22, emoji: "สมองเอ๋อปัญญาควาย", photo: "james.jpg", likes: 0,
+      bio: "โย่ว กูมาเทสระบบไอน้อง",
+      tags: ["💻 เขียนโค้ดแบบโง่ๆ", "🎮 เล่นเกมทั้งวัน", "🎵 ฟังเพลงไปเรื่อย"],
+      skills: [["HTML", 1], ["CSS", 1], ["JavaScript", 1]],
+      c1: "#8a5cff", c2: "#2575fc" },
+    { name: "ตูน", age: 22, emoji: "😎", photo: "toon.jpg", likes: 0,
+      bio: "หยิ่งแมร่งไม่ตอบคุวย",
+      tags: ["ชักว่าวข้ามปี", "ดูหนังโป๊ช่วยชาติ", "ต่อยคนแก่เตะหมากระทีบเด็ก"],
+      skills: [["น้ำที่เสีย", 300], ["ความดูบ่อย", 160], ["ความเก่ง", 450]],
+      c1: "#11c98a", c2: "#0b8f6a" },
+    { name: "ริก", age: 21, emoji: "🤩", photo: "rik.jpg", likes: 0,
+      bio: "หยิ่งเหมือนกันไม่ตอบคุวยไรเลย",
+      tags: ["ร้องเพลงสุดเพราะเหลือเกิน", "ฝึกภาษาระดับโปรลีก", "วาดภาพแข่งกับนายก"],
+      skills: [["ดนตรี", 1175], ["ภาษา", 1155], ["วาดรูป", 1145]],
+      c1: "#ff6a3d", c2: "#d6246e" }
+  ];
+
+  const $ = id => document.getElementById(id);
+  let current = 0;
+
+  /* ---------- 1) พิมพ์ข้อความทีละตัว ---------- */
+  const text = "อ่านทำคุวยไร";
+  let t = 0;
+  (function type() {
+    $("typing").firstChild && ($("typing").firstChild.textContent = text.slice(0, t));
+    if (!$("typing").firstChild) $("typing").prepend(document.createTextNode(""));
+    if (t <= text.length) { t++; setTimeout(type, 70); }
+  })();
+
+  /* ---------- 2) ดวงดาวหนีเมาส์ ---------- */
+  const cv = $("stars"), ctx = cv.getContext("2d");
+  let stars = [], mouse = { x: -999, y: -999 };
+  function resize() {
+    cv.width = innerWidth; cv.height = innerHeight;
+    stars = Array.from({ length: 120 }, () => ({
+      x: Math.random() * cv.width, y: Math.random() * cv.height,
+      r: Math.random() * 2 + 0.5, s: Math.random() * 0.4 + 0.1, ox: 0, oy: 0
+    }));
+  }
+  addEventListener("resize", resize); resize();
+  (function draw() {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    stars.forEach(s => {
+      s.y -= s.s; if (s.y < 0) s.y = cv.height;
+      const dx = s.x - mouse.x, dy = s.y - mouse.y, d = Math.hypot(dx, dy);
+      if (d < 120) { s.ox += dx / d * 2; s.oy += dy / d * 2; }
+      s.ox *= 0.92; s.oy *= 0.92;
+      ctx.beginPath(); ctx.arc(s.x + s.ox, s.y + s.oy, s.r, 0, 7);
+      ctx.fillStyle = "rgba(255,255,255," + (0.4 + s.r / 4) + ")"; ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  })();
+  addEventListener("mousemove", e => {
+    mouse.x = e.clientX; mouse.y = e.clientY;
+    $("glow").style.left = e.clientX + "px"; $("glow").style.top = e.clientY + "px";
+  });
+
+  /* ---------- 3) การ์ดหน้าแรก (เอียง 3 มิติ) ---------- */
+  const picHTML = p => p.photo ? '<img src="' + p.photo + '" alt="' + p.name + '">' : p.emoji;
+
+  function renderGrid() {
+    $("grid").innerHTML = "";
+    people.forEach((p, i) => {
+      const d = document.createElement("div");
+      d.className = "mini-card";
+      d.style.setProperty("--c1", p.c1);
+      d.innerHTML = '<div class="shine"></div><div class="pic">' + picHTML(p) +
+        '</div><h3>' + p.name + '</h3><p>อายุ ' + p.age + ' ปี</p>';
+      d.addEventListener("mousemove", e => {
+        const r = d.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+        d.style.transform = "rotateY(" + ((x / r.width - 0.5) * 30) + "deg) rotateX(" + ((0.5 - y / r.height) * 30) + "deg) scale(1.08)";
+        d.style.setProperty("--mx", x + "px"); d.style.setProperty("--my", y + "px");
+      });
+      d.addEventListener("mouseleave", () => d.style.transform = "");
+      d.addEventListener("click", () => { current = i; openModal(true); });
+      $("grid").appendChild(d);
+    });
+  }
+
+  /* ---------- 4) หน้าต่างข้อมูล ---------- */
+  function openModal(first) {
+    const p = people[current], m = $("modal");
+    m.style.background = "linear-gradient(135deg," + p.c1 + "," + p.c2 + ")";
+    m.style.setProperty("--c1", p.c1);
+    m.classList.remove("swap"); void m.offsetWidth; if (!first) m.classList.add("swap");
+    $("mAvatar").innerHTML = picHTML(p);
+    $("mName").textContent = p.name;
+    $("mBio").textContent = p.bio;
+    $("mTags").innerHTML = p.tags.map(t => '<span class="tag">' + t + '</span>').join("");
+    $("mSkills").innerHTML = p.skills.map(s =>
+      '<div class="skill">' + s[0] + ' — ' + s[1] + '%<div class="bar"><div class="fill" data-w="' + s[1] + '"></div></div></div>').join("");
+    updateInfo();
+    $("overlay").classList.add("show");
+    setTimeout(() => document.querySelectorAll(".fill").forEach(f => f.style.width = f.dataset.w + "%"), 100);
+  }
+  function updateInfo() {
+    const p = people[current];
+    $("mAge").textContent = "อายุ " + p.age + " ปี";
+    $("likeBtn").textContent = (p.likes > 0 ? "❤️" : "🤍") + " ถูกใจ " + p.likes;
+  }
+  function closeModal() { $("overlay").classList.remove("show"); renderGrid(); }
+  function go(step) { current = (current + step + people.length) % people.length; openModal(false); }
+
+  /* ---------- 5) คอนเฟตติ ---------- */
+  function confetti(x, y, n) {
+    const colors = ["#ff6ec4", "#ffe66d", "#4ade80", "#60a5fa", "#fff"];
+    for (let i = 0; i < n; i++) {
+      const c = document.createElement("div");
+      c.className = "confetti";
+      c.style.left = x + "px"; c.style.top = y + "px";
+      c.style.background = colors[i % colors.length];
+      document.body.appendChild(c);
+      const a = Math.random() * 6.28, v = 80 + Math.random() * 180;
+      c.animate([
+        { transform: "translate(0,0) rotate(0)", opacity: 1 },
+        { transform: "translate(" + Math.cos(a) * v + "px," + (Math.sin(a) * v + 200) + "px) rotate(" + Math.random() * 900 + "deg)", opacity: 0 }
+      ], { duration: 1200 + Math.random() * 600, easing: "cubic-bezier(.2,.7,.4,1)" }).onfinish = () => c.remove();
+    }
+  }
+
+  /* ---------- 6) ปุ่มต่าง ๆ ---------- */
+  $("likeBtn").addEventListener("click", e => {
+    people[current].likes++; updateInfo(); confetti(e.clientX, e.clientY, 40);
+  });
+  $("birthdayBtn").addEventListener("click", e => {
+    people[current].age++; updateInfo(); confetti(e.clientX, e.clientY, 80);
+    $("modal").classList.remove("shake"); void $("modal").offsetWidth; $("modal").classList.add("shake");
+  });
+  $("closeBtn").addEventListener("click", closeModal);
+  $("overlay").addEventListener("click", e => { if (e.target === $("overlay")) closeModal(); });
+  $("prev").addEventListener("click", () => go(-1));
+  $("next").addEventListener("click", () => go(1));
+  addEventListener("keydown", e => {
+    if (!$("overlay").classList.contains("show")) return;
+    if (e.key === "Escape") closeModal();
+    if (e.key === "ArrowLeft") go(-1);
+    if (e.key === "ArrowRight") go(1);
+  });
+
+  renderGrid();
+</script>
+</body>
+</html>
